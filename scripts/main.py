@@ -2,14 +2,14 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from sklearn import cross_validation
-from sklearn.tree import DecisionTreeClassifier
+
 
 train = pd.read_csv('../data/train.csv')
 (cv_train, cv_test) = cross_validation.train_test_split(train, train_size=0.75)
-train_labels = normalize_labels(cv_train['label'])
-train = cv_train.drop('label', 1)
-test_labels = cv_test['label']
-test = cv_test.drop('label', 1)
+train_labels = pd.get_dummies(cv_train['label'])
+train = cv_train.drop('label', 1) / 255.0
+test_labels = pd.get_dummies(cv_test['label'])
+test = cv_test.drop('label', 1) / 255.0
 
 # Placeholder for input data
 x = tf.placeholder("float", [None, 784])
@@ -35,12 +35,12 @@ print("Start learning")
 for i in range(1000):
     if (i+1) % 100 == 0:
         print(i+1)
-    sess.run(train_step, feed_dict={x: train[:100], y_: train_labels[:100]})
+    (A, B, label_a, label_b) = cross_validation.train_test_split(train, train_labels, train_size=100)
+    sess.run(train_step, feed_dict={x: A, y_: label_a})
 
-print('done.')
-# score = np.equal(test_labels, y).sum()/float(len(test))
-# print("Score: %f" % score)
-
-
-def normalize_labels(labels):
-    train[:size]
+# Get prediction and expecte value
+correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+# Definie accuracy operation
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+# check accuracy
+print(sess.run(accuracy, feed_dict={x: test, y_: test_labels}))
