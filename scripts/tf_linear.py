@@ -30,7 +30,7 @@ sess.run(init)
 
 print("Start learning")
 # Do 1000 steps of training
-for i in range(1000):
+for i in range(100):
     if (i+1) % 100 == 0:
         print(i+1)
     (A, B, label_a, label_b) = cross_validation.train_test_split(train, train_labels, train_size=100)
@@ -42,3 +42,5 @@ correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 # check accuracy
 print(sess.run(accuracy, feed_dict={x: test, y_: test_labels}))
+
+print(sess.run(y, feed_dict={x: test}))
