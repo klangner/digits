@@ -3,13 +3,11 @@ import numpy as np
 import pandas as pd
 from sklearn import cross_validation
 
-
 # The MNIST dataset has 10 classes, representing the digits 0 through 9.
 NUM_CLASSES = 10
 # The MNIST images are always 28x28 pixels.
 IMAGE_SIZE = 28
 IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE
-
 
 # Placeholders
 image_placeholder = tf.placeholder("float", shape=[None, 784])
@@ -59,13 +57,13 @@ def load_test():
 
 
 def build_model():
-    ''' Create Network
-    '''
+    """ Create Network
+    """
     # First layer 32 features with 5x5 patch (kernel)
     W_conv1 = weight_variable([5, 5, 1, 32])
     b_conv1 = bias_variable([32])
     # Reshape x as tensor
-    x_image = tf.reshape(image_placeholder, [-1,28,28,1])
+    x_image = tf.reshape(image_placeholder, [-1, 28, 28, 1])
     # We then convolve x_image with the weight tensor, add the bias, apply the ReLU function, and finally max pool.
     h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
     h_pool1 = max_pool_2x2(h_conv1)
@@ -81,7 +79,7 @@ def build_model():
     # Multiply by a weight matrix, add a bias, and apply a ReLU.
     W_fc1 = weight_variable([7 * 7 * 64, 1024])
     b_fc1 = bias_variable([1024])
-    h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])
+    h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * 64])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
     # To reduce overfitting, we will apply dropout before the readout layer
@@ -94,23 +92,22 @@ def build_model():
 
 
 def loss(model):
-    ''' Cost function
-    '''
-    correct_prediction = tf.equal(tf.argmax(model,1), tf.argmax(label_placeholder,1))
+    """ Cost function
+    """
+    correct_prediction = tf.equal(tf.argmax(model, 1), tf.argmax(label_placeholder, 1))
     return tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
 
 def train_model(sess, model, accuracy, train, labels):
-    ''' Train and evaluate model
-    '''
-    cross_entropy = -tf.reduce_sum(label_placeholder*tf.log(model))
+    cross_entropy = -tf.reduce_sum(label_placeholder * tf.log(model))
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
     sess.run(tf.initialize_all_variables())
-    for i in range(20000):
+    for i in range(200):
         (train_a, _, label_a, _) = cross_validation.train_test_split(train, labels, train_size=100)
         sess.run(train_step, feed_dict={image_placeholder: train_a, label_placeholder: label_a, keep_prob: 0.5})
         if i % 100 == 0:
-            train_accuracy = sess.run(accuracy, feed_dict={image_placeholder: train_a, label_placeholder: label_a, keep_prob: 1.0})
+            train_accuracy = sess.run(accuracy, feed_dict={image_placeholder: train_a, label_placeholder: label_a,
+                                                           keep_prob: 1.0})
             print "step %d, training accuracy %g" % (i, train_accuracy)
 
 
@@ -120,7 +117,8 @@ def cross_validate():
     accuracy = loss(model)
     session = tf.Session()
     train_model(session, model, accuracy, train, train_labels)
-    test_accuracy = session.run(accuracy, feed_dict={image_placeholder: test, label_placeholder: test_labels, keep_prob: 1.0})
+    test_accuracy = session.run(accuracy,
+                                feed_dict={image_placeholder: test, label_placeholder: test_labels, keep_prob: 1.0})
     print(test_accuracy)
 
 
@@ -133,9 +131,9 @@ def submission():
 
     test = load_test()
     y = session.run(model, feed_dict={image_placeholder: test, keep_prob: 1.0})
-    solution = pd.DataFrame({'ImageId': np.arange(1, len(y)+1), 'Label': np.argmax(y, axis=1)})
+    solution = pd.DataFrame({'ImageId': np.arange(1, len(y) + 1), 'Label': np.argmax(y, axis=1)})
     solution.to_csv('../data/solution.csv', index=False)
 
 
-# cross_validate()
-submission()
+cross_validate()
+# submission()
