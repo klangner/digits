@@ -76,10 +76,10 @@ def build_model():
     h_pool2 = max_pool_2x2(h_conv2)
 
     # Reshape the tensor from the pooling layer into a batch of vectors,
+    h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * 64])
     # Multiply by a weight matrix, add a bias, and apply a ReLU.
     W_fc1 = weight_variable([7 * 7 * 64, 1024])
     b_fc1 = bias_variable([1024])
-    h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * 64])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
     # To reduce overfitting, we will apply dropout before the readout layer
@@ -92,8 +92,6 @@ def build_model():
 
 
 def loss(model):
-    """ Cost function
-    """
     correct_prediction = tf.equal(tf.argmax(model, 1), tf.argmax(label_placeholder, 1))
     return tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
